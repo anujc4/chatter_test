@@ -10,6 +10,14 @@ require("./db/mongo");
 
 app.use(bodyParser.json());
 
+// TODO ASSIGNMENT
+app.use((req, _res, next) => {
+  // TODO Log the following here
+  // console.log("Started GET/POST/PUT/DELETE <url> <JSON.stringify(body)>")
+  // console.log("Executing some API");
+  next();
+});
+
 app.use("/api/user", userRouter);
 
 app.all("/*", function(req, res) {

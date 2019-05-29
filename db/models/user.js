@@ -1,5 +1,6 @@
 var mongoose = require("mongoose");
 var moment = require("moment");
+var uniqueValidator = require("mongoose-unique-validator");
 
 var UserSchema = new mongoose.Schema(
   {
@@ -9,12 +10,13 @@ var UserSchema = new mongoose.Schema(
       required: true
     },
     email: String,
-    age: Number,
     firstName: String,
     lastName: String
   },
   { timestamps: true }
 );
+
+UserSchema.plugin(uniqueValidator, {message: " is already taken."});
 
 UserSchema.methods.toJSON = function() {
   return {

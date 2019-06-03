@@ -4,6 +4,7 @@ var app = express();
 var bodyParser = require("body-parser");
 var port = process.env.APP_PORT;
 var userRouter = require("./routes/user");
+var chatRouter = require("./routes/chat_history");
 var path = require("path");
 
 require("./db/mongo");
@@ -19,6 +20,7 @@ app.use((req, _res, next) => {
 });
 
 app.use("/api/user", userRouter);
+app.use("/api/chat", chatRouter);
 
 app.all("/*", function(req, res) {
   res.status(404).sendFile(path.join(__dirname, "public", "error", "404.html"));

@@ -5,20 +5,23 @@ var bodyParser = require("body-parser");
 var port = process.env.APP_PORT;
 var userRouter = require("./routes/user");
 var chatRouter = require("./routes/chat_history");
+var indexRouter = require("./routes/index");
+
+var errorHandler = require("./middleware/error_handler");
 var path = require("path");
+var mongoose = require("mongoose");
 
 require("./db/mongo");
 
 app.use(bodyParser.json());
+// app.use(errorHandler);
 
-// TODO ASSIGNMENT
 app.use((req, _res, next) => {
-  // TODO Log the following here
-  // console.log("Started GET/POST/PUT/DELETE <url> <JSON.stringify(body)>")
-  // console.log("Executing some API");
   next();
 });
 
+// www.chatterapi.com/index
+app.use("/index", indexRouter);
 app.use("/api/user", userRouter);
 app.use("/api/chat", chatRouter);
 
@@ -27,5 +30,5 @@ app.all("/*", function(req, res) {
 });
 
 app.listen(port, function() {
-  console.log("Example app listening on port ", port);
+  console.log("Chatter app listening on port ", port);
 });

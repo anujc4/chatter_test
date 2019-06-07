@@ -1,0 +1,5 @@
+1. Implement your own middleware to check basic auth in all your api calls
+ -> Decode headers using Buffer. DO NOT USE npm packages
+
+username -> your name
+password -> idiom

@@ -3,3 +3,19 @@
 
 username -> your name
 password -> idiom
+
+
+AGENDA - Week 3 Session 1
+
+1. Add a `password` column to our `User` Documment.
+2. Create a Login API
+3. Basic Auth -> Admin APIs
+4. JWT -> User APIs for Session Management
+5. Add `Configuration` Document in our collection.
+
+Steps to implement Task 1
+1. Add a password attribute in our document
+2. At the time of user creation, take the password from the user
+and 2.1 -> Encrypt the password
+    2.2 -> Store the encrypted value in our collection
+3. Return the user back in the response

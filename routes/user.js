@@ -1,33 +1,8 @@
 var router = require("express").Router();
-var User = require("../db/models/user").User;
-var GetUser = require("../utils/requestUtils").genericGet;
 var validationResult = require("express-validator/check").validationResult;
 var validator = require("express-validator/check");
-var Error = require("../utils/responseUtils");
-
-router.get("/", function(req, res) {
-  GetUser(req, User)
-    .then(function(x) {
-      res.json(x);
-    })
-    .catch(function(er) {
-      Error.sendInternalServerError(res, er);
-    });
-});
-
-router.get("/:id", function(req, res) {
-  User.find({ _id: req.params.id })
-    .limit(1)
-    .then(x => {
-      // res.json(x);
-      user = x.shift();
-      if (user) res.send(user);
-      else throw `User with ${req.params.id} does not exist.`;
-    })
-    .catch(err => {
-      Error.sendNotFoundError(res, err);
-    });
-});
+var User = require("../db/models/user").User;
+var Auth = require("../utils/auth");
 
 var rules = [
   validator
@@ -35,108 +10,52 @@ var rules = [
     .isEmail()
     .normalizeEmail(),
   validator
-    .body("firstName")
-    .isAlpha()
-    .trim(),
-  validator
-    .body("lastName")
-    .isAlpha()
-    .trim(),
-  validator
-    .body("username")
-    .isLowercase()
-    .trim()
+    .body("password")
+    .not()
+    .isEmpty()
 ];
 
-// Promise based
-router.post("/", rules, function(req, res) {
-  var errors = validationResult(req);
-  if (!errors.isEmpty())
-    return res.status(422).json({ errors: errors.array() });
-  user = new User();
-  user.username = req.body.username;
-  user.email = req.body.email;
-  user.firstName = req.body.firstName;
-  user.lastName = req.body.lastName;
-  user
-    .save()
-    .then(function(x) {
-      res.send(x);
-    })
-    .catch(function(err) {
-      Error.sendInternalServerError(res, err);
-    });
-});
+/*
+1. Check if the email and password is present or not
+2. Check in `User` document if there is a user with the requested email
+3. If user is not present, send error back to client with "Invalid email"
+4. If user is present, check if the password is valid
+5. If password is invalid, send error to client with "Invalid password"
+6. If password is valid, send correct response to client
+*/
 
-// Async Await based
-router.post("/", rules, async (req, res) => {
+router.post("/login", rules, async (req, resp, next) => {
   try {
     var errors = validationResult(req);
     if (!errors.isEmpty())
-      return res.status(422).json({ errors: errors.array() });
-    user = new User();
-    user.username = req.body.username;
-    user.email = req.body.email;
-    user.firstName = req.body.firstName;
-    user.lastName = req.body.lastName;
-    savedUser = await user.save();
-    res.send(savedUser);
-  } catch (err) {
-    Error.sendInternalServerError(res, err);
-  }
-});
-
-/*
-1. Check if the user exists
-2. If yes, update the user
-3. if no, send error back in API response
-4. Once user is updated, send the updated user back in the API response
-*/
-router.put("/:id", async (req, res) => {
-  try {
-    updatedUserResp = await User.updateOne({ _id: req.params.id }, req.body);
-    console.log("Updated user resp", JSON.stringify(updatedUserResp));
-    if (updatedUserResp.n === 0)
-      throw `User with ${req.params.id} does not exist.`;
-    user = await User.findOne({ _id: req.params.id });
-    res.send(user);
+      return res.status(400).json({ errors: errors.array() });
+    var user = await User.findOne({ email: req.body.email });
+    if (user) {
+      if (user.validatePassword(req.body.password)) {
+        token = Auth.generateToken({
+          id: user._id,
+          email: user.email
+        });
+        return resp.send({
+          username: user.username
+          , email: user.email
+          , firstName: user.firstName
+          , lastName: user.lastName
+          , token
+        });
+      } else {
+        e = new Error("Invalid password. Please try again");
+        e.status = 401;
+        throw e;
+      }
+    } else {
+      e = new Error("Invalid email. Does not exist.");
+      e.status = 401;
+      throw e;
+    }
   } catch (e) {
-    Error.sendNotFoundError(res, e);
-  }
-});
-
-/*
-1. Delete the user from model
-2. Done!
-*/
-router.delete("/:id", async (req, res) => {
-  try{
-    deleteResp = await User.deleteOne({_id: req.params.id});
-    res.send(deleteResp);
-  }catch(e){
-    Error.sendNotFoundError(res, e);
+    next(e);
   }
 });
 
 module.exports = router;
-
-// app.get("/api/user_async", async function(req, res) {
-//   console.log("Executing 2nd route");
-//   try {
-//     users = User.find().exec();
-//     console.log(users);
-//     res.json(users);
-//   } catch (e) {
-//     console.error("Unable to fetch users", e);
-//     res.send("Unable to process request");
-//   }
-// });
-
-// app.get("/api/user_promise", function(req, res) {
-//   console.log("QUERY", req.query);
-
-//   console.log("Executing 1st route");
-//   User.find().then(function(x) {
-//     res.json(x);
-//   });
-// });

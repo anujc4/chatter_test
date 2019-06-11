@@ -24,7 +24,6 @@ app.use((req, _res, next) => {
 
 app.use("/api/v1/chat", authMiddleware);
 
-// www.chatterapi.com/index
 app.use("/index", indexRouter);
 app.use("/api/v1/admin/user", userAdminRouter);
 app.use("/api/v1/user", userRouter);

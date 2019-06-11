@@ -49,7 +49,7 @@ router.post("/login", rules, async (req, resp, next) => {
         throw e;
       }
     } else {
-      e = new Error("Invalid email. Does not exist.");
+      e = new Error("Invalid email. User does not exist.");
       e.status = 401;
       throw e;
     }

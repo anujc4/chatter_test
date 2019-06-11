@@ -17,6 +17,7 @@ router.use((req, _resp, next) => {
     if (authToken) {
       decodedAuth = AuthUtils.validateToken(authToken);
       req.auth = decodedAuth;
+      // _resp.send("Wow your token  was valid!!")
       next();
     } else {
       e = new Error("Auth credentials missing in request.");

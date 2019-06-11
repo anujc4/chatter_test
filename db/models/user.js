@@ -13,6 +13,10 @@ var UserSchema = new mongoose.Schema(
     email: String,
     firstName: String,
     lastName: String,
+    isAdmin: {
+      type: Boolean,
+      default: false
+    },
     password: {
       type: String,
       require: true
@@ -37,6 +41,14 @@ UserSchema.methods.setPassword = function(password) {
 
 UserSchema.methods.validatePassword = function(password) {
   return this.password === encrypt(password);
+};
+
+UserSchema.methods.validateUser = async function(email, password) {
+  user = await this.model("User").findOne({ email });
+  if(user){
+    if(user.validatePassword(password)) return user;
+    else throw new Error("User password is incorrect");
+  } throw new Error("User does not exist");
 };
 
 UserSchema.plugin(uniqueValidator, {

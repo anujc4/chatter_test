@@ -49,7 +49,10 @@ var rules = [
   validator
     .body("password")
     .not()
-    .isEmpty()
+    .isEmpty(),
+  validator
+    .body("isAdmin")
+    .isBoolean()
 ];
 
 // Promise based
@@ -61,6 +64,7 @@ router.post("/", rules, function(req, res) {
   user = new User();
   user.username = req.body.username;
   user.email = req.body.email;
+  if (req.body.isAdmin) user.isAdmin = req.body.isAdmin;
   user.firstName = req.body.firstName;
   user.lastName = req.body.lastName;
   user.setPassword(req.body.password);

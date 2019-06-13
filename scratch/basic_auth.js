@@ -25,3 +25,7 @@ function decode(token) {
 
 var decoded = decode("Basic YW51ajpwYXNzd29yZA==");
 decoded;
+
+
+// Authorization : Basic base64encode(<user:password>)
+

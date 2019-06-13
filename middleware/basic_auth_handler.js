@@ -6,7 +6,7 @@ STEPS FOR IMPLEMENTATION
 1. Check the headers for auth key :: req.headers.authorization
 2. If auth is not present, throw an error
 3. if auth is present, it should be in a specifc format = Basic base64(<Username:password>)
-  3.1. replace("Basic", "");
+  3.1. replace("Basic ", "");
   3.2 decodeBase64 -> username:password
   3.3 split(":")
 4. Check if the user exists in the database
@@ -14,13 +14,14 @@ STEPS FOR IMPLEMENTATION
 6. If present, call next();
 */
 
-router.use(async (req, resp, next) => {
+router.use(async (req, _resp, next) => {
   try {
     authToken = req.headers.authorization;
     if (authToken) {
       encodedToken = authToken.replace("Basic ", "");
       decodedToken = Utils.decodeBase64(encodedToken);
       credentialsTuple = decodedToken.split(":");
+      // TODO FIX ME!!!!!!!!!!!
       if (credentialsTuple.length === 2) {
         user = await new User().validateUser(
           credentialsTuple.shift(),

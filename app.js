@@ -5,6 +5,7 @@ var bodyParser = require("body-parser");
 var port = process.env.APP_PORT;
 
 var authMiddleware = require("./middleware/authentication_handler");
+var basicAuthHandler = require("./middleware/basic_auth_handler");
 
 var userAdminRouter = require("./routes/admin/user");
 var userRouter = require("./routes/user");
@@ -23,6 +24,7 @@ app.use((req, _res, next) => {
 });
 
 app.use("/api/v1/chat", authMiddleware);
+app.use("/api/v1/admin", basicAuthHandler);
 
 app.use("/index", indexRouter);
 app.use("/api/v1/admin/user", userAdminRouter);

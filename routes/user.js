@@ -110,10 +110,10 @@ router.put("/:id", async (req, res) => {
 2. Done!
 */
 router.delete("/:id", async (req, res) => {
-  try{
-    deleteResp = await User.deleteOne({_id: req.params.id});
+  try {
+    deleteResp = await User.deleteOne({ _id: req.params.id });
     res.send(deleteResp);
-  }catch(e){
+  } catch (e) {
     Error.sendNotFoundError(res, e);
   }
 });

@@ -1,0 +1,17 @@
+Three approaches to test an API which is behind an authentication middlware
+1. Do not attach the middlware
+2. Use the login api's functionality to create a valid token
+3. Mock the behaviour of jwt signing token
+
+Mockito -> Testing framework
+  Ability to run tests
+  Design hooks and test
+  Test Report
+Chai -> Assertions Library
+  Language to express test cases
+  Expect, Should, Assert
+Sinon -> Mocking Library
+  Fake the behaviour of your code
+  Ability to use `spy`, `stubs`, `mocks`
+
+Sinon -> Mock the authentication process of our web server

@@ -5,6 +5,8 @@ var bodyParser = require("body-parser");
 var port = process.env.APP_PORT;
 var userRouter = require("./routes/user");
 var chatRouter = require("./routes/chat_history");
+
+var authMiddleware = require("./middleware/auth").jwtHandler;
 var path = require("path");
 
 require("./db/mongo");
@@ -18,6 +20,8 @@ app.use((req, _res, next) => {
   // console.log("Executing some API");
   next();
 });
+
+app.use(authMiddleware);
 
 app.use("/api/user", userRouter);
 app.use("/api/chat", chatRouter);

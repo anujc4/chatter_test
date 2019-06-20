@@ -79,23 +79,57 @@ describe("User", () => {
       .catch(err => done(err));
   });
 
-  it("GET /api/user/:userId", done => {
+  it("GET /api/user/:userId when userId is invalid", done => {
     url = "/api/user/" + "abc";
     chai
       .request(app)
       .get(url)
       .send()
       .then(resp => {
+        expect(resp).to.have.status(400);
+        expect(resp.body).to.not.equal(undefined);
+        expect(resp.body).to.be.an("object");
+        expect(resp.body)
+          .to.have.property("error")
+          .to.equal(true);
+        expect(resp.body)
+          .to.have.property("userMessage")
+          .to.equal("abc is an invalid input");
+        expect(resp.body)
+          .to.have.property("errorMessage")
+          .to.equal("Bad request");
+        done();
+      })
+      .catch(err => done(err));
+  });
 
+  /*
+  status: 404
+  {
+    error: true,
+    userMessage: "${userId} does not exist"
+    errorMessage: "Not found"
+  }
+  */
+  it("GET /api/user/:userId when userId does not exist", done => {
+    chai
+      .request(app)
+      .get("/api/user/5cdeedc546226fbaaa591ab3")
+      .send()
+      .then(resp => {
+        expect(resp).to.have.status(404);
+        expect(resp.body).to.be.an("object");
+        expect(resp.body)
+          .to.have.property("error")
+          .to.equal(true);
+        expect(resp.body)
+          .to.have.property("userMessage")
+          .to.equal("5cdeedc546226fbaaa591ab3 does not exist");
+        expect(resp.body)
+          .to.have.property("errorMessage")
+          .to.equal("Not found");
         done();
       })
       .catch(err => done(err));
   });
 });
-
-// user = new User({
-//   username: "testuser",
-//   email: "test@user.com",
-//   firstName: "test",
-//   lastName: "user"
-// });

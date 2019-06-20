@@ -30,4 +30,17 @@ app.listen(port, function() {
   console.log("Example app listening on port", port);
 });
 
+var errorHandler = function(err, _req, resp, _next) {
+  userMessage = err.userMessage ? err.userMessage : "Something went wrong";
+  errorMessage = err.errorMessage ? err.errorMessage : err.message;
+  status = err.status ? err.status : 500;
+  resp.status(status).send({
+    error: true,
+    userMessage,
+    errorMessage
+  });
+};
+
+app.use(errorHandler);
+
 module.exports = app;

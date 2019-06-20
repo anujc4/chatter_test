@@ -3,29 +3,39 @@ var User = require("../db/models/user").User;
 var GetUser = require("../utils/requestUtils").genericGet;
 var validationResult = require("express-validator/check").validationResult;
 var validator = require("express-validator/check");
-var Error = require("../utils/responseUtils");
+// var Error = require("../utils/responseUtils");
+var error = require("../utils/error_helper");
 
-router.get("/", function(req, res) {
+router.get("/", function(req, res, next) {
   GetUser(req, User)
     .then(function(x) {
       res.json(x);
     })
-    .catch(function(er) {
-      Error.sendInternalServerError(res, er);
+    .catch(function(err) {
+      next(err);
     });
 });
 
-router.get("/:id", function(req, res) {
-  User.find({ _id: req.params.id })
-    .limit(1)
-    .then(x => {
-      // res.json(x);
-      user = x.shift();
+router.get("/:id", function(req, res, next) {
+  User.findOne({ _id: req.params.id })
+    .then(user => {
       if (user) res.send(user);
-      else throw `User with ${req.params.id} does not exist.`;
+      else
+        throw error("Not found", {
+          status: 404,
+          userMessage: `${req.params.id} does not exist`
+        });
     })
     .catch(err => {
-      Error.sendNotFoundError(res, err);
+      if (err.name === "CastError") {
+        opts = {
+          status: 400,
+          userMessage: `${req.params.id} is an invalid input`,
+          errorMessage: "Bad request"
+        };
+        return next(error(err.message, opts));
+      }
+      next(err);
     });
 });
 
@@ -49,7 +59,7 @@ var rules = [
 ];
 
 // Promise based
-router.post("/", rules, function(req, res) {
+router.post("/", rules, function(req, res, next) {
   var errors = validationResult(req);
   if (!errors.isEmpty())
     return res.status(422).json({ errors: errors.array() });
@@ -64,12 +74,12 @@ router.post("/", rules, function(req, res) {
       res.send(x);
     })
     .catch(function(err) {
-      Error.sendInternalServerError(res, err);
+      next(err);
     });
 });
 
 // Async Await based
-router.post("/", rules, async (req, res) => {
+router.post("/", rules, async (req, res, next) => {
   try {
     var errors = validationResult(req);
     if (!errors.isEmpty())
@@ -82,7 +92,7 @@ router.post("/", rules, async (req, res) => {
     savedUser = await user.save();
     res.send(savedUser);
   } catch (err) {
-    Error.sendInternalServerError(res, err);
+    next(err);
   }
 });
 
@@ -92,7 +102,7 @@ router.post("/", rules, async (req, res) => {
 3. if no, send error back in API response
 4. Once user is updated, send the updated user back in the API response
 */
-router.put("/:id", async (req, res) => {
+router.put("/:id", async (req, res, next) => {
   try {
     updatedUserResp = await User.updateOne({ _id: req.params.id }, req.body);
     console.log("Updated user resp", JSON.stringify(updatedUserResp));
@@ -100,8 +110,8 @@ router.put("/:id", async (req, res) => {
       throw `User with ${req.params.id} does not exist.`;
     user = await User.findOne({ _id: req.params.id });
     res.send(user);
-  } catch (e) {
-    Error.sendNotFoundError(res, e);
+  } catch (err) {
+    next(err);
   }
 });
 
@@ -109,18 +119,18 @@ router.put("/:id", async (req, res) => {
 1. Delete the user from model
 2. Done!
 */
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (req, res, next) => {
   try {
     deleteResp = await User.deleteOne({ _id: req.params.id });
     res.send(deleteResp);
   } catch (e) {
-    Error.sendNotFoundError(res, e);
+    throw error(e.message);
   }
 });
 
 module.exports = router;
 
-// app.get("/api/user_async", async function(req, res) {
+// app.get("/api/user_async", async function(req, res, next) {
 //   console.log("Executing 2nd route");
 //   try {
 //     users = User.find().exec();
@@ -132,7 +142,7 @@ module.exports = router;
 //   }
 // });
 
-// app.get("/api/user_promise", function(req, res) {
+// app.get("/api/user_promise", function(req, res, next) {
 //   console.log("QUERY", req.query);
 
 //   console.log("Executing 1st route");

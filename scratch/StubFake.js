@@ -1,9 +1,12 @@
 var sinon = require("sinon");
 
 var animal = {};
+
 animal.sayName = function nameFn() {
   return "Animal is a cat";
 };
+
+console.log(animal.sayName());
 
 sinon.stub(animal, "sayName").callsFake(function fakeNameFn() {
   return "Animal is a dog";

@@ -35,6 +35,7 @@ router.get("/from/:fromUserId/to/:toUserId", (req, resp) => {
 
 router.post("/", (req, resp) => {
   chat = new ChatHistory();
+  // chat.fromUser = req.auth.username;
   chat.fromUser = req.body.fromUser;
   chat.toUser = req.body.toUser;
   chat.message = req.body.message;

@@ -4,15 +4,22 @@ var GetUser = require("../../utils/requestUtils").genericGet;
 var validationResult = require("express-validator/check").validationResult;
 var validator = require("express-validator/check");
 var Error = require("../../utils/responseUtils");
+var Redis = require("../../product/redis").client;
 
-router.get("/", function(req, res) {
-  GetUser(req, User)
-    .then(function(x) {
-      res.json(x);
-    })
-    .catch(function(er) {
-      Error.sendInternalServerError(res, er);
-    });
+router.get("/", async function(req, res) {
+  try {
+    usersList = await Redis.getAsync("all_users");
+    if (usersList) {
+      res.json(JSON.parse(usersList));
+    } else {
+      dbUsers = await GetUser(req, User);
+      Redis.setAsync("all_users", JSON.stringify(dbUsers));
+      res.json(dbUsers);
+    }
+  } catch (e) {
+    console.log(e);
+    Error.sendInternalServerError(res, e);
+  }
 });
 
 router.get("/:id", function(req, res) {
@@ -50,9 +57,7 @@ var rules = [
     .body("password")
     .not()
     .isEmpty(),
-  validator
-    .body("isAdmin")
-    .isBoolean()
+  validator.body("isAdmin").isBoolean()
 ];
 
 // Promise based

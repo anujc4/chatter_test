@@ -23,8 +23,8 @@ app.use((req, _res, next) => {
   next();
 });
 
-app.use("/api/v1/chat", authMiddleware);
-app.use("/api/v1/admin", basicAuthHandler);
+// app.use("/api/v1/chat", authMiddleware);
+// app.use("/api/v1/admin", basicAuthHandler);
 
 app.use("/index", indexRouter);
 app.use("/api/v1/admin/user", userAdminRouter);

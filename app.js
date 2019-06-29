@@ -26,7 +26,7 @@ app.use((req, _res, next) => {
 // app.use("/api/v1/chat", authMiddleware);
 // app.use("/api/v1/admin", basicAuthHandler);
 
-app.use("/index", indexRouter);
+app.use("/", indexRouter);
 app.use("/api/v1/admin/user", userAdminRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/chat", chatRouter);
